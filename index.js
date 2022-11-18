@@ -1,19 +1,29 @@
 const express = require("express");
-const axios = require("axios");
-
+const path = require("node:path");
 const app = express();
 
-const apiKey = process.env.API_KEY;
-const domain = process.env.API_DOMAIN;
-const videosUrl = `https://${domain}/videos?api_key=${apiKey}`;
+const videoListJSONFile = path.join(__dirname, "./data/videoList.json");
+const videoList = require(videoListJSONFile);
 
-app.get("/", (_req, res) => {
-  axios.get(videosUrl).then((response) => {
-    console.log(response.data);
-  });
-  res.send("WELCOME");
+const videoDetailsJSONFile = path.join(__dirname, "./data/videoDetails.json");
+const videoDetails = require(videoDetailsJSONFile);
+
+console.log(videoDetails);
+
+app.get("/videos", (_req, res) => {
+  res.status(200).json(videoList);
 });
 
+app.get("/videos/:videoId", (req, res) => {
+  const getVideoDetails = (id) => {
+    return videoDetails.find((element) => element.id === id);
+  };
+  res.status(200).json(getVideoDetails(req.params.videoId));
+});
+
+app.get("/", (_req, res) => {
+  res.send("WELCOME");
+});
 app.listen(8080, () => {
   console.log("Server is listening on port 8080");
 });
